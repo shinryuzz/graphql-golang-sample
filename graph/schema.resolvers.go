@@ -11,6 +11,7 @@ import (
 	"math/big"
 
 	"github.com/shinryuzz/graphql-golang-sample/graph/model"
+	"github.com/shinryuzz/graphql-golang-sample/internal"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -22,11 +23,6 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	return todo, nil
-}
-
-// Todoオブジェクトに紐づくUserオブジェクトを返すリゾルバ
-func (r *Resolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return &model.User{ID: obj.User.ID, Name: "user " + obj.User.ID}, nil
 }
 
 // Todos is the resolver for the todos field.
@@ -54,11 +50,21 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	return todos, nil
 }
 
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+// Mutation returns internal.MutationResolver implementation.
+func (r *Resolver) Mutation() internal.MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+// Query returns internal.QueryResolver implementation.
+func (r *Resolver) Query() internal.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *Resolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+	return &model.User{ID: obj.User.ID, Name: "user " + obj.User.ID}, nil
+}
